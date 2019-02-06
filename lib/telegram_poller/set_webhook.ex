@@ -4,6 +4,8 @@ defmodule TelegramPoller.SetWebhook do
   import Plug.Conn
   alias TelegramPoller.Hook.ETS
   use Plug.Builder
+  require Logger
+
 
   plug(Plug.Logger)
 
@@ -28,6 +30,7 @@ defmodule TelegramPoller.SetWebhook do
   defp validate(conn, _opts), do: conn
 
   defp handle(conn = %{assigns: %{token: token}, body_params: %{"url" =>  url}}, _opts) do
+    Logger.info "Registering '#{url}' for token '#{token}'"
     ETS.put(token, url)
 
     send_resp(conn, 201, "")
