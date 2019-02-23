@@ -35,4 +35,8 @@ defmodule TelegramPoller.SetWebhook do
 
     send_resp(conn, 201, "")
   end
+  defp handle(conn, _opts) do
+    Logger.info(inspect(conn))
+    send_resp(conn, 404, "")
+  end
 end
