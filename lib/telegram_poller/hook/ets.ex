@@ -15,7 +15,7 @@ defmodule TelegramPoller.Hook.ETS do
 
   @impl true
   def put(token, url) do
-    :ets.insert(:hook, {token, %TelegramPoller.Hook{token: token, url: url}})
+    :ets.insert(:hook, {token, %TelegramPoller.Hook{token: token, url: url, timestamp: DateTime.utc_now()}})
     :ok
   end
 

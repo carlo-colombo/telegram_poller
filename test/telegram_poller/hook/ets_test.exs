@@ -12,6 +12,6 @@ defmodule TelegramPoller.Hook.ETSTest do
   test "when put a webhook it shows when listing the hooks" do
     ETS.put("a_new_token", "http://www.example.com")
 
-    assert [%{token: "a_new_token", url: "http://www.example.com"}] = ETS.list()
+    assert [%{token: "a_new_token", url: "http://www.example.com", timestamp: timestamp}] = ETS.list()
   end
 end
