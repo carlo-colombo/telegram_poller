@@ -2,7 +2,7 @@ defmodule TelegramPoller.SetWebhook do
   @moduledoc false
 
   import Plug.Conn
-  alias TelegramPoller.Hook.ETS
+  alias TelegramPoller.Hook.DynamicSupervisor
   use Plug.Builder
   require Logger
 
@@ -31,7 +31,7 @@ defmodule TelegramPoller.SetWebhook do
 
   defp handle(conn = %{assigns: %{token: token}, body_params: %{"url" =>  url}}, _opts) do
     Logger.info "Registering '#{url}' for token '#{token}'"
-    ETS.put(token, url)
+    DynamicSupervisor.put(token, url)
 
     send_resp(conn, 201, "")
   end

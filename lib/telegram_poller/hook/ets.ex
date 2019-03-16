@@ -15,13 +15,29 @@ defmodule TelegramPoller.Hook.ETS do
 
   @impl true
   def put(token, url) do
-    :ets.insert(:hook, {token, %TelegramPoller.Hook{token: token, url: url, timestamp: DateTime.utc_now()}})
+    hook = %TelegramPoller.Hook{token: token, url: url, timestamp: DateTime.utc_now()}
+    :ets.insert(:hook, {token, hook})
+
+    {:ok, pid} =
+      DynamicSupervisor.start_child(
+        TelegramPoller.GetUpdatesSupervisor,
+        {TelegramPoller.GetUpdates, hook}
+      )
+
     :ok
   end
 
   @impl true
   def list do
     res = :ets.match_object(:hook, {:_, :_})
+          |> IO.inspect
     Enum.map(res, &elem(&1, 1))
+  end
+
+  @impl
+  def report_restart(token) do
+    [{_, hook}] = :ets.lookup(:hook, token)
+    hook = update_in(hook.restart, &(&1 + 1))
+    :ets.insert(:hook, {token, hook})
   end
 end
