@@ -15,24 +15,28 @@ defmodule TelegramPoller.Hook.DynamicSupervisor do
   def put(token, url) do
     hook = %TelegramPoller.Hook{token: token, url: url, timestamp: DateTime.utc_now()}
 
-    {:ok, pid} =
-      DynamicSupervisor.start_child(
-        TelegramPoller.GetUpdatesSupervisor,
-        {TelegramPoller.GetUpdates, hook}
-      )
+    case DynamicSupervisor.start_child(
+           TelegramPoller.GetUpdatesSupervisor,
+           {TelegramPoller.GetUpdates, hook}
+         ) do
+      {:ok, _} ->
+        :ok
 
-    :ok
+      {:error, {:already_started, pid}} ->
+        terminate(pid)
+        put(token, url)
+    end
   end
 
   @impl true
   def list do
     children
-    |> Enum.map(&(elem(&1, 1)))
-    |> Enum.map(&(Registry.keys(TelegramPoller.Hook.Registry, &1)))
-    |> List.flatten
-    |> Enum.map(&(Registry.lookup(TelegramPoller.Hook.Registry, &1)))
-    |> List.flatten
-    |> Enum.map(&(elem(&1, 1)))
+    |> Enum.map(&elem(&1, 1))
+    |> Enum.map(&Registry.keys(TelegramPoller.Hook.Registry, &1))
+    |> List.flatten()
+    |> Enum.map(&Registry.lookup(TelegramPoller.Hook.Registry, &1))
+    |> List.flatten()
+    |> Enum.map(&elem(&1, 1))
   end
 
   def terminate(pid) do

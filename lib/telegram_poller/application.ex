@@ -18,7 +18,7 @@ defmodule TelegramPoller.Application do
         options: [port: 9404]
       ),
       TelegramPoller.Hook.ETS,
-      {DynamicSupervisor, name: TelegramPoller.GetUpdatesSupervisor, strategy: :one_for_one, max_seconds: 120},
+      {DynamicSupervisor, name: TelegramPoller.GetUpdatesSupervisor, strategy: :one_for_one},
       {Registry, keys: :unique, name: TelegramPoller.Hook.Registry}
     ]
 

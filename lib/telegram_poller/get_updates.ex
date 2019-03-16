@@ -3,7 +3,6 @@ defmodule TelegramPoller.GetUpdates do
 
   require Logger
 
-  alias TelegramPoller.Hook
   alias TelegramPoller.Hook.DynamicSupervisor, as: DS
 
   @timeout 300
@@ -25,10 +24,9 @@ defmodule TelegramPoller.GetUpdates do
 
   @impl true
   def handle_continue(:retry, %{retries: retries, hook: hook}) when retries > @max_retries do
-    Logger.info("[#{hook.token}] Stopping...")
+    Logger.error("[#{hook.token}] Stopping... too many retries(#{@max_retries})")
 
     DS.terminate(self())
-
     {:stop, "Too many retries(#{@max_retries})", %{}}
   end
 
