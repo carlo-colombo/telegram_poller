@@ -30,7 +30,7 @@ defmodule TelegramPoller.Hook.DynamicSupervisor do
 
   @impl true
   def list do
-    children
+    children()
     |> Enum.map(&elem(&1, 1))
     |> Enum.map(&Registry.keys(TelegramPoller.Hook.Registry, &1))
     |> List.flatten()
@@ -43,12 +43,10 @@ defmodule TelegramPoller.Hook.DynamicSupervisor do
     DynamicSupervisor.terminate_child(TelegramPoller.GetUpdatesSupervisor, pid)
   end
 
-  def children, do: DynamicSupervisor.which_children(TelegramPoller.GetUpdatesSupervisor)
+  defp children, do: DynamicSupervisor.which_children(TelegramPoller.GetUpdatesSupervisor)
 
   def kill_all do
-    children
-    |> Enum.map(
-      &DynamicSupervisor.terminate_child(TelegramPoller.GetUpdatesSupervisor, elem(&1, 1))
-    )
+    children()
+    |> Enum.map(&terminate(elem(&1, 1)))
   end
 end

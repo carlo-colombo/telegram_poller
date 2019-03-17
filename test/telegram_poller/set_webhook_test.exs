@@ -44,5 +44,5 @@ defmodule TelegramPoller.SetWebhookTest do
     end
   end)
 
-  defp clear_ets, do: :ets.delete_all_objects(:hook)
+  defp clear_ets, do: TelegramPoller.Hook.DynamicSupervisor.kill_all
 end
