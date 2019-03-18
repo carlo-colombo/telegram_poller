@@ -3,6 +3,8 @@ defmodule TelegramPoller.SetWebhookTest do
   doctest TelegramPoller.SetWebhook
   use Plug.Test
 
+  alias TelegramPoller.SetWebhook
+
   import Mox
   setup :verify_on_exit!
 
@@ -19,7 +21,7 @@ defmodule TelegramPoller.SetWebhookTest do
     test "the endpoint is added to the hooks" do
       conn =
         conn(:put, "/botvalidtoken/setwebhook", %{"url" => "http://example.com/foo/bar"})
-        |> TelegramPoller.SetWebhook.call([])
+        |> SetWebhook.call([])
 
       assert conn.state == :sent
       assert conn.status == 201
@@ -31,7 +33,7 @@ defmodule TelegramPoller.SetWebhookTest do
     {"invalid path", :put, "/botavalidtoken/foobar", 404},
     {"invalid path", :put, "/bot1234", 404},
     {"invalid path", :put, "/setweebhook", 404},
-    {"method not allowed", :post, "/bot1234/setwebhook", 405},
+    {"method not allowed", :post, "/bot1234/setwebhook", 405}
   ]
   |> Enum.each(fn {desc, method, path, status} ->
     test "status is set to #{status} if #{desc} (#{method} #{path})" do
@@ -44,5 +46,5 @@ defmodule TelegramPoller.SetWebhookTest do
     end
   end)
 
-  defp clear_ets, do: TelegramPoller.Hook.DynamicSupervisor.kill_all
+  defp clear_ets, do: TelegramPoller.Hook.DynamicSupervisor.stop_all()
 end

@@ -1,29 +1,20 @@
 defmodule TelegramPoller.Hook.DynamicSupervisor do
   @moduledoc false
-  use GenServer
   @behaviour TelegramPoller.Hook
 
-  def start_link(default) when is_list(default) do
-    GenServer.start_link(__MODULE__, default)
-  end
-
-  @impl true
-  def init(_) do
-  end
+  @registry TelegramPoller.Hook.Registry
+  @supervisor TelegramPoller.GetUpdatesSupervisor
 
   @impl true
   def put(token, url) do
     hook = %TelegramPoller.Hook{token: token, url: url, timestamp: DateTime.utc_now()}
 
-    case DynamicSupervisor.start_child(
-           TelegramPoller.GetUpdatesSupervisor,
-           {TelegramPoller.GetUpdates, hook}
-         ) do
+    case DynamicSupervisor.start_child(@supervisor, {TelegramPoller.GetUpdates, hook}) do
       {:ok, _} ->
         :ok
 
       {:error, {:already_started, pid}} ->
-        terminate(pid)
+        stop(pid)
         put(token, url)
     end
   end
@@ -32,21 +23,21 @@ defmodule TelegramPoller.Hook.DynamicSupervisor do
   def list do
     children()
     |> Enum.map(&elem(&1, 1))
-    |> Enum.map(&Registry.keys(TelegramPoller.Hook.Registry, &1))
+    |> Enum.map(&Registry.keys(@registry, &1))
     |> List.flatten()
-    |> Enum.map(&Registry.lookup(TelegramPoller.Hook.Registry, &1))
+    |> Enum.map(&Registry.lookup(@registry, &1))
     |> List.flatten()
     |> Enum.map(&elem(&1, 1))
   end
 
-  def terminate(pid) do
-    DynamicSupervisor.terminate_child(TelegramPoller.GetUpdatesSupervisor, pid)
-  end
+  @impl true
+  def stop(pid), do: DynamicSupervisor.terminate_child(@supervisor, pid)
 
-  defp children, do: DynamicSupervisor.which_children(TelegramPoller.GetUpdatesSupervisor)
-
-  def kill_all do
+  @impl true
+  def stop_all do
     children()
-    |> Enum.map(&terminate(elem(&1, 1)))
+    |> Enum.map(&stop(elem(&1, 1)))
   end
+
+  defp children, do: DynamicSupervisor.which_children(@supervisor)
 end

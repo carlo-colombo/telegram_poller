@@ -2,6 +2,7 @@ defmodule TelegramPoller.ApplicationTest do
   use ExUnit.Case, async: false
 
   alias TelegramPoller.Application
+  alias TelegramPoller.Hook.DynamicSupervisor
 
   defp start(context) do
     Application.start(nil, [])
@@ -13,7 +14,7 @@ defmodule TelegramPoller.ApplicationTest do
   setup :start
 
   setup context do
-    TelegramPoller.Hook.DynamicSupervisor.kill_all()
+    DynamicSupervisor.stop_all()
     context
   end
 

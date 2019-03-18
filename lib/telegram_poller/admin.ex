@@ -18,7 +18,7 @@ defmodule TelegramPoller.Admin do
   get "/api/hooks" do
     conn
     |> put_resp_header("content-type", "application/json; charset=utf-8")
-    |> send_resp(200, Jason.encode!(Hook.DynamicSupervisor.list))
+    |> send_resp(200, Jason.encode!(Hook.DynamicSupervisor.list()))
   end
 
   match _ do

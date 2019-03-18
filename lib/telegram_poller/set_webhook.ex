@@ -6,7 +6,6 @@ defmodule TelegramPoller.SetWebhook do
   use Plug.Builder
   require Logger
 
-
   plug(Plug.Logger)
 
   plug(Plug.Parsers,
@@ -26,15 +25,18 @@ defmodule TelegramPoller.SetWebhook do
     end
   end
 
-  defp validate(conn = %{method: method}, _opts) when method != "PUT", do: halt(send_resp(conn, 405, ""))
+  defp validate(conn = %{method: method}, _opts) when method != "PUT",
+    do: halt(send_resp(conn, 405, ""))
+
   defp validate(conn, _opts), do: conn
 
-  defp handle(conn = %{assigns: %{token: token}, body_params: %{"url" =>  url}}, _opts) do
-    Logger.info "Registering '#{url}' for token '#{token}'"
+  defp handle(conn = %{assigns: %{token: token}, body_params: %{"url" => url}}, _opts) do
+    Logger.info("Registering '#{url}' for token '#{token}'")
     DynamicSupervisor.put(token, url)
 
     send_resp(conn, 201, "")
   end
+
   defp handle(conn, _opts) do
     Logger.info(inspect(conn))
     send_resp(conn, 404, "")
