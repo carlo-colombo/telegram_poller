@@ -25,7 +25,7 @@ defmodule TelegramPoller.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:jason, "~> 1.1"},
       {:httpoison, "~> 1.5", override: true},
-      {:mint, "~> 0.1.0"},
+      {:mint, "~> 1.2.0"},
       {:castore, "~> 0.1.0"},
       {:bypass, "~> 1.0", only: :test},
       {:exsync, "~> 0.2", only: :dev},
